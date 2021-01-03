@@ -4,24 +4,29 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 from pyspark.sql.types import *
-import plotly.graph_objects as go
 from pyspark.sql import functions as F
+from pyspark import SparkConf, SparkContext # these are for older Sparks. 
+from pyspark.streaming import StreamingContext
+from pyspark.sql import SparkSession
+import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from fbprophet import Prophet
 from data import * 
+import findspark
+import os
 
 
 if __name__ == "__main__":
 
-    TCP_IP = "localhost"
-    TCP_PORT = 9009
-    conn = None
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.listen(1)
+    findspark.init()
+    findspark.find()
 
-    print('Waiting for TCP connection')
-    conn, addr = s.accept()
-    print('Connected...getting data from API')
+    #use below if you must
+    os.environ['JAVA_HOME'] = '/Library/Java/JavaVirtualMachines/jdk1.8.0_271.jdk/Contents/Home'
+    spark = SparkSession.builder.appName('covid_19_analysis').getOrCreate()
 
-    resp = request_data()
-    extract_data(resp, conn)
+    data = data_to_df('cumulative', spark)
+    data.show(5)
+
+
+

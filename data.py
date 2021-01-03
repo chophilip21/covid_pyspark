@@ -2,9 +2,9 @@ import requests
 import datetime
 import json
 import sys
+from pyspark.sql.types import StructField, StringType, DoubleType, StructType, DateType
 
-
-def request_data(type='cumulative', loc='BC'):
+def request_data(type='cumulative'):
 
     """
     Specify the type of API calls to make
@@ -20,8 +20,8 @@ def request_data(type='cumulative', loc='BC'):
         pass
 
     elif type == 'cumulative':
-        url_today = f'https://api.opencovid.ca/summary?stat=cases&date={today}&loc={loc}&version="true"'
-        url_yesterday = f'https://api.opencovid.ca/summary?stat=cases&date={yesterday}&loc={loc}&version="true"'
+        url_today = f'https://api.opencovid.ca/summary?stat=cases&date={today}&version="true"'
+        url_yesterday = f'https://api.opencovid.ca/summary?stat=cases&date={yesterday}&version="true"'
 
     response = requests.get(url_today)
 
@@ -38,32 +38,68 @@ def request_data(type='cumulative', loc='BC'):
         print(f"Picking up results from {yesterday} as results of {today} are not updated yet.")
         response = requests.get(url_yesterday)  
 
-        # print(response.json())
-
     return response
 
-def extract_data(http_resp, tcp_connetion):
+def clean_data(data):
 
-    """
-    TODO: We should think carefully what data we want to extract
-    """
+    if data == "NULL":
+        data = 0
 
-    for line in http_resp.iter_lines():
+    return float(data)
 
-        try:
-            full_data = json.loads(line)
-            active_cases = full_data['active_cases']
-            # cumulate_cases = full_data['cumulative_cases']
-            print(f'Extracted active cases: {active_cases}')
+def string_to_date(date):
+    date_time_obj = datetime.datetime.strptime(date, '%d-%m-%Y')
 
-            tcp_connetion.connection.send(active_cases + '\n')
-        
-        except:
-            e = sys.exc_info()[0]
-            print(f"Error: {e}")
+    return date_time_obj.date()
+
+    
+def data_to_df(data_type, session):
+
+    response = request_data(data_type)
+    province_total = response.json()
+
+    province_total_data = []
+
+    # select only the relevant information (TODO: Maybe add )
+    for record in province_total['summary']:
+        province_data = {}
+        province_data['province'] = record['province']
+        province_data['active_cases'] = clean_data(record['active_cases'])
+        province_data['cumulative_cases'] = clean_data(record['cumulative_cases'])
+        province_data['cumulative_tested'] = clean_data(record['cumulative_testing'])
+        province_data['cumulative_deaths'] = clean_data(record['cumulative_deaths'])
+        province_data['vaccine_administration'] = clean_data(record['cumulative_avaccine'])
+        province_data['cumulative_recovered'] = clean_data(record['cumulative_recovered'])
+        province_data['date'] = string_to_date(record['date'])
+
+        province_total_data.append(province_data)
+
+    data_schema = [
+        StructField("province", StringType(), True),
+        StructField("active_cases", DoubleType(), True),
+        StructField("cumulative_cases", DoubleType(), True),
+        StructField("cumulative_tested", DoubleType(), True),
+        StructField("cumulative_deaths", DoubleType(), True),
+        StructField("vaccine_administration", DoubleType(), True),
+        StructField("cumulative_recovered", DoubleType(), True),
+        StructField('date', DateType(), True)
+    ]
+    
+    final_struct = StructType(fields=data_schema)
+
+    total_state_data_df = session.createDataFrame(province_total_data,final_struct)
+
+    return total_state_data_df
+
+
 
 if __name__ == "__main__":
 
-    print('===' * 40)
-    request_data()
-    print('===' * 40)
+    pass
+
+    # date = '01-01-2021'
+
+
+    # print(date_time_obj.date(), type(date_time_obj.date()))
+
+

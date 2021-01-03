@@ -13,3 +13,8 @@ Install requirements by running
 ```
 pip install -r requirements.txt
 ```
+
+
+- Does it have to be a streaming? 
+- The API itself is updated like every 24 hours so there is very little point.
+- For stocks, streaming would be nice idea. 

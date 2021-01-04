@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <title>{{ title }}</title>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
 </head>
 
 <body>
@@ -13,9 +14,6 @@
   <center>
     <canvas id="chart" width="1000" height="800"></canvas>
     <script>
-      
-      //define mychart as a global variable
-      var mychart;
 
       // bar chart data
       var barData = {
@@ -57,7 +55,132 @@
        }
      );
 
+     
     </script>
+  
+  <script>
+  
+  active_cases = {action: "active_cases"}
+  active_cases = JSON.stringify(active_cases)
+  $(document).ready(function(){
+    $("#active_cases.button.button2").click(function(){
+      console.log("Requested to POST")
+      $.ajax({
+        url: '/',
+        data:active_cases,
+        contentType:'application/json',
+        type:'POST',
+        success: function(response){
+          console.log('posting success');
+        },
+        error: function(error){
+          console.log(error);
+        }
+      });
+    });
+  });
+
+  cumulative_cases = {action: "cumulative_cases"}
+  cumulative_cases = JSON.stringify(cumulative_cases)
+  $(document).ready(function(){
+    $("#cumulative_cases.button.button2").click(function(){
+      console.log("Requested to POST")
+      $.ajax({
+        url: '/',
+        data:cumulative_cases,
+        contentType:'application/json',
+        type:'POST',
+        success: function(response){
+          console.log('posting success');
+        },
+        error: function(error){
+          console.log(error);
+        }
+      });
+    });
+  });
+
+  cumulative_tested = {action: "cumulative_tested"}
+  cumulative_tested = JSON.stringify(cumulative_tested)
+  $(document).ready(function(){
+    $("#cumulative_tested.button.button2").click(function(){
+      console.log("Requested to POST")
+      $.ajax({
+        url: '/',
+        data:cumulative_tested,
+        contentType:'application/json',
+        type:'POST',
+        success: function(response){
+          console.log('posting success');
+        },
+        error: function(error){
+          console.log(error);
+        }
+      });
+    });
+  });
+
+  cumulative_deaths = {action: "cumulative_deaths"}
+  cumulative_deaths = JSON.stringify(cumulative_deaths)
+  $(document).ready(function(){
+    $("#cumulative_deaths.button.button2").click(function(){
+      console.log("Requested to POST")
+      $.ajax({
+        url: '/',
+        data:cumulative_deaths,
+        contentType:'application/json',
+        type:'POST',
+        success: function(response){
+          console.log('posting success');
+        },
+        error: function(error){
+          console.log(error);
+        }
+      });
+    });
+  });
+
+  vaccine_administration = {action: "vaccine_administration"}
+  vaccine_administration = JSON.stringify(vaccine_administration)
+  $(document).ready(function(){
+    $("#vaccine_administration.button.button2").click(function(){
+      console.log("Requested to POST")
+      $.ajax({
+        url: '/',
+        data:vaccine_administration,
+        contentType:'application/json',
+        type:'POST',
+        success: function(response){
+          console.log('posting success');
+        },
+        error: function(error){
+          console.log(error);
+        }
+      });
+    });
+  });
+
+  cumulative_recovered = {action: "cumulative_recovered"}
+  cumulative_recovered = JSON.stringify(cumulative_recovered)
+  $(document).ready(function(){
+    $("#cumulative_recovered.button.button2").click(function(){
+      console.log("Requested to POST")
+      $.ajax({
+        url: '/',
+        data:cumulative_recovered,
+        contentType:'application/json',
+        type:'POST',
+        success: function(response){
+          console.log('posting success');
+        },
+        error: function(error){
+          console.log(error);
+        }
+      });
+    });
+  });
+
+  </script>
 
 <style>
    .button {
@@ -130,13 +253,14 @@
   </center>
   <center>
     <div id="btn-group">
-    <button class="button button2">Active cases</button>
-    <button class="button button2">Cumulative cases</button>
-    <button class="button button2">Cumulative tested</button>
-    <button class="button button2">Cumulative deaths</button>
-    <button class="button button2">Vaccine administration</button>
-    <button class="button button2">Cumulative recovered</button>
+    <button id="active_cases" class="button button2">Active cases</button>
+    <button id="cumulative_cases" class="button button2">Cumulative cases</button>
+    <button id="cumulative_tested" class="button button2">Cumulative tested</button>
+    <button id= "cumulative_deaths" class="button button2">Cumulative deaths</button>
+    <button id="vaccine_administration" class="button button2">Vaccine administration</button>
+    <button id="cumulative_recovered" class="button button2">Cumulative recovered</button>
   </div>
+
 
   </center>
   

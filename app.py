@@ -45,7 +45,13 @@ def bar():
     print('what is the bar value now..?', bar_values)
     max_values = max(bar_values) + max(bar_values) * 0.1
 
-    return render_template('bar_chart.html', title= f'Canadian cumulative deaths from COVID-19 up to {df.date[1]}', max=max_values, labels=bar_labels, values=bar_values)
+    return render_template('bar_test.html')
+
+    # return render_template('bar_test.html', title= f'Canadian cumulative deaths from COVID-19 up to {df.date[1]}', max=max_values, labels=bar_labels, values=bar_values)
+
+@app.route('/active_cases')
+def data():
+    return df.active_cases.to_jso
 
 
 
@@ -66,6 +72,4 @@ if __name__ == "__main__":
     print(df.head(15))
 
  
-    if __name__ == '__main__':
-
-        app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)

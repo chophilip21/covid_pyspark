@@ -19,6 +19,36 @@ from flask import render_template
 
 
 
+app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+
+@app.route('/', methods = ['POST', 'GET'])
+def bar():
+
+    bar_labels=df.province
+    bar_values= df.cumulative_cases
+
+    if request.method == 'POST':
+        try:
+            formulier = request.json
+            action = formulier["action"];
+
+            print('requested action:', action)
+
+            bar_values = df[action]
+
+        except TypeError:
+            print('INVALID Type')
+        
+        
+    print('what is the bar value now..?', bar_values)
+    max_values = max(bar_values) + max(bar_values) * 0.1
+
+    return render_template('bar_chart.html', title= f'Canadian cumulative deaths from COVID-19 up to {df.date[1]}', max=max_values, labels=bar_labels, values=bar_values)
+
+
+
 if __name__ == "__main__":
 
     findspark.init()
@@ -35,37 +65,7 @@ if __name__ == "__main__":
 
     print(df.head(15))
 
-    # flask setting
-    app = Flask(__name__)
-    app.config['TEMPLATES_AUTO_RELOAD'] = True
-
-
-    @app.route('/', methods = ['POST', 'GET'])
-    def bar():
-
-        bar_labels=df.province
-        bar_values= df.cumulative_cases
-
-        if request.method == 'POST':
-            try:
-                formulier = request.json
-                action = formulier["action"];
-
-                print('requested action:', action)
-
-                bar_values = df[action]
-
-            except TypeError:
-                print('INVALID Type')
-            
-            
-        print('what is the bar value now..?', bar_values)
-        max_values = max(bar_values) + max(bar_values) * 0.1
-
-        return render_template('bar_chart.html', title= f'Canadian cumulative deaths from COVID-19 up to {df.date[1]}', max=max_values, labels=bar_labels, values=bar_values)
-
  
-
     if __name__ == '__main__':
 
         app.run(host='0.0.0.0', port=8080, debug=True)

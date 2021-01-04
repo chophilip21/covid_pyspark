@@ -87,9 +87,11 @@ def data_to_df(data_type, session):
     
     final_struct = StructType(fields=data_schema)
 
-    total_state_data_df = session.createDataFrame(province_total_data,final_struct)
+    df = session.createDataFrame(province_total_data,final_struct)
 
-    return total_state_data_df
+    final_df = df.where((df.province != "Repatriated"))
+    
+    return final_df
 
 
 

@@ -13,7 +13,7 @@
     <div class = "card">
         <div class = "card-body">
             <center>
-            <h1>{{ title }}</h1>
+            <h2>{{ title }}</h2>
             </center>
         </div>
         <div class = "card-body">
@@ -34,15 +34,17 @@
 
 <script>
   var ctx = document.getElementById('myChart').getContext('2d');
-  var max = {{ max }};
+  var bar_data;
+  var title = 'Cumulative Cases'
+//   var max = {{ max }};
   var bar_labels = {labels: [
           {% for item in labels %}
            "{{ item }}",
           {% endfor %}
         ]};
   
-  var bar_data = {values: [
-        {% for item in values %}
+  bar_data = {values: [
+        {% for item in values_default %}
             {{ item }},
         {% endfor %}
   ]};
@@ -53,14 +55,14 @@
       // The type of chart we want to create
       type: 'bar',
   
-      // The data for our dataset
+      // Be careful of Javascript syntax
       data: {
-          labels: bar_labels,
+          labels: bar_labels.labels,
           datasets: [{
-              label: 'why is this crashing',
+              label: title,
               backgroundColor: 'rgb(0, 99, 132)',
               borderColor: 'rgb(0, 99, 132)',
-              data: [500, 500, 500, 500, 500, 1000, 1000, 800, 200, 5000, 4000, 5000, 9999],
+              data: bar_data.values,
           }]
       },  
       
@@ -78,15 +80,22 @@
 
   function updateChart(){
     
-    // new data
-    chart.data.datasets[0].data = [45, 15, 1000, 21, 20, 30, 45];
-    
+    bar_data = {values: [
+        {% for item in values_active %}
+            {{ item }},
+        {% endfor %}
+    ]};
+
+    console.log('MUST LOG new data.')
+    chart.data.datasets[0].data = bar_data;
+
+    // should be able to update the title here too. 
     chart.update();
   };
 
 </script>
 <style>
-h1 {
+h2 {
     color: #000000; 
     transition: .5s; 
     -moz-transition: .5s; 

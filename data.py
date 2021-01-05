@@ -44,6 +44,10 @@ def clean_data(data):
 
     if data == "NULL":
         data = 0
+    
+    #no data should be less than 0. 
+    elif data < 0:
+        data = 0
 
     return float(data)
 

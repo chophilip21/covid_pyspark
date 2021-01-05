@@ -27,7 +27,7 @@ and then run:
 python app.py
 ```
 
-
+<!-- 
 ## Data Streaming using Apache Spark
 
 Traditionally, when people think about data streaming, terms such as “real-time,” “24/7,” or “always on” come to mind. But you may have cases where data only arrives at fixed intervals. That is, data appears every hour or once a day, and COVID-19 data is only updated once a day as well. Nevertheless, we cannot say that the nature of our data is static, and therefore it is still beneficial to perform incremental processing on this data. However, it would be wasteful to keep a cluster up and running 24/7 just to perform a short amount of processing once a day. We can minimze the waste using trigger feature in Pyspark structured streaming. 
@@ -36,4 +36,4 @@ Structured streaming has benefit over traditional batch based streaming in that 
 
 ## Kafka 
 
-Kafka is an event streaming platform, which acts as a database in this case. Here, we pulish and subscribe to streams of events, similar to a message queue or enterprise messaging system. You can also store streams of events in a fault-tolerant storage as long as you want (hours, days, months, forever).
+Kafka is an event streaming platform, which acts as a database in this case. Here, we pulish and subscribe to streams of events, similar to a message queue or enterprise messaging system. You can also store streams of events in a fault-tolerant storage as long as you want (hours, days, months, forever). -->

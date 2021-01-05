@@ -19,16 +19,19 @@
         <div class = "card-body">
             <canvas id="myChart"></canvas>
         </div>
+        <center>
+        <div id="btn-group">
+            <button id="active_cases" class="button button2" onclick="updateChart('Active cases')">Active cases</button>
+            <button id="cumulative_cases" class="button button2" onclick="updateChart('Cumulative cases')">Cumulative cases</button>
+            <button id="cumulative_tested" class="button button2" onclick="updateChart('Cumulative tested')">Cumulative tested</button>
+            <button id= "cumulative_deaths" class="button button2" onclick="updateChart('Cumulative deaths')">Cumulative deaths</button>
+            <button id="vaccine_administration" class="button button2" onclick="updateChart('Vaccine administration')">Vaccine administration</button>
+            <button id="cumulative_recovered" class="button button2" onclick="updateChart('Cumulative recovered')">Cumulative recovered</button>
+        </div>
+        </center>
 </div>
 <center>
-<div id="btn-group">
-    <button id="active_cases" class="button button2" onclick="updateChart()">Active cases</button>
-    <button id="cumulative_cases" class="button button2">Cumulative cases</button>
-    <button id="cumulative_tested" class="button button2">Cumulative tested</button>
-    <button id= "cumulative_deaths" class="button button2">Cumulative deaths</button>
-    <button id="vaccine_administration" class="button button2">Vaccine administration</button>
-    <button id="cumulative_recovered" class="button button2">Cumulative recovered</button>
-</div>
+
 </center>
 </div>
 
@@ -80,19 +83,55 @@
 
   // Should be able to throw ('death') for button click. 
   // Try chart.chart.data.label = 'new title', or at least console log this first. 
-  function updateChart(){
+  function updateChart(new_title){
     
-    bar_data = {values: [
-        {% for item in values_active %}
-            {{ item }},
-        {% endfor %}
-    ]};
 
-    console.log('MUST LOG new data.')
-    chart.data.datasets[0].data = bar_data;
+    if (new_title == "Active cases"){
+        data = {values: [
+            {% for item in values_active_cases %}
+                {{ item }},
+            {% endfor %}
+        ]};
+    } else if (new_title == "Cumulative cases"){
+        data = {values: [
+            {% for item in values_cumulative_cases %}
+                {{ item }},
+            {% endfor %}
+        ]};
+    } else if (new_title == "Cumulative tested"){
+        data = {values: [
+            {% for item in values_cumulative_tested %}
+                {{ item }},
+            {% endfor %}
+        ]};
+    } else if (new_title == "Cumulative deaths"){
+        data = {values: [
+            {% for item in values_cumulative_deaths %}
+                {{ item }},
+            {% endfor %}
+        ]};
+    } else if (new_title == "Vaccine administration"){
+        data = {values: [
+            {% for item in values_vaccine %}
+                {{ item }},
+            {% endfor %}
+        ]};
+
+    } else if (new_title == "Cumulative recovered"){
+        data = {values: [
+            {% for item in values_cumulative_recovered %}
+                {{ item }},
+            {% endfor %}
+        ]};
+    }
+    
+
+    chart.data.datasets[0].data = data.values;
+    chart.data.datasets[0].label = new_title;
 
     // should be able to update the title here too. 
     chart.update();
+    console.log('Updated data:', new_title, data);
   };
 
 </script>
@@ -110,11 +149,11 @@ h2 {
     background-color: #4CAF50; /* Green */
     border: none;
     color: white;
-    padding: 10px 18px;
+    padding: 12px 18px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 10px;
+    font-size: 12px;
     margin: 4px 2px;
     transition-duration: 0.4s;
     cursor: pointer;

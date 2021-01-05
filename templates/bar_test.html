@@ -1,36 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<canvas id="myChart"></canvas>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+</head>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 
-<body>
+<body class="bg-info py-5">
+    <div class = "col-md-8 offset-md-2">
+    <div class = "card">
+        <div class = "card-body">
+            <center>
+            <h1>{{ title }}</h1>
+            </center>
+        </div>
+        <div class = "card-body">
+            <canvas id="myChart"></canvas>
+        </div>
+</div>
+<center>
+<div id="btn-group">
+    <button id="active_cases" class="button button2" onclick="updateChart()">Active cases</button>
+    <button id="cumulative_cases" class="button button2">Cumulative cases</button>
+    <button id="cumulative_tested" class="button button2">Cumulative tested</button>
+    <button id= "cumulative_deaths" class="button button2">Cumulative deaths</button>
+    <button id="vaccine_administration" class="button button2">Vaccine administration</button>
+    <button id="cumulative_recovered" class="button button2">Cumulative recovered</button>
+</div>
+</center>
+</div>
 
 <script>
   var ctx = document.getElementById('myChart').getContext('2d');
+  var max = {{ max }};
+  var bar_labels = {labels: [
+          {% for item in labels %}
+           "{{ item }}",
+          {% endfor %}
+        ]};
+  
+  var bar_data = {values: [
+        {% for item in values %}
+            {{ item }},
+        {% endfor %}
+  ]};
+
+  console.log(bar_labels)
+  console.log(bar_data)
   var chart = new Chart(ctx, {
       // The type of chart we want to create
-      type: 'line',
+      type: 'bar',
   
       // The data for our dataset
       data: {
-          labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+          labels: bar_labels,
           datasets: [{
-              label: 'My First dataset',
-              backgroundColor: 'rgb(255, 99, 132)',
-              borderColor: 'rgb(255, 99, 132)',
-              data: [0, 10, 5, 2, 20, 30, 45]
+              label: 'why is this crashing',
+              backgroundColor: 'rgb(0, 99, 132)',
+              borderColor: 'rgb(0, 99, 132)',
+              data: [500, 500, 500, 500, 500, 1000, 1000, 800, 200, 5000, 4000, 5000, 9999],
           }]
-      },
-  
-      // Configuration options go here
-      options: {}
+      },  
+      
+      options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    suggestedMin: 0,
+                    suggestedMax: 300, 
+                }
+            }]
+        }
+    }
   });
 
+  function updateChart(){
+    
+    // new data
+    chart.data.datasets[0].data = [45, 15, 1000, 21, 20, 30, 45];
+    
+    chart.update();
+  };
+
 </script>
+<style>
+h1 {
+    color: #000000; 
+    transition: .5s; 
+    -moz-transition: .5s; 
+    -webkit-transition: .5s; 
+    -o-transition: .5s; 
+    font-family: 'Muli', sans-serif; 
+    }
+
+.button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 18px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 10px;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    }
+
+.button2 {
+    background-color: white; 
+    color: black; 
+    border: 2px solid #008CBA;
+}
+
+.button2:hover {
+    background-color: #008CBA;
+    color: white;
+}
+
+</style>
+
+<!-- bootstrap -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 </body>
 
-</html>>
+</html>
 
 

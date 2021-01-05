@@ -97,11 +97,7 @@ def data_to_df(data_type, session):
 
 if __name__ == "__main__":
 
-    pass
-
-    # date = '01-01-2021'
-
-
-    # print(date_time_obj.date(), type(date_time_obj.date()))
-
+    test = ['test', 'your', 'code']
+    code = ','.join(test)
+    print(code)
 

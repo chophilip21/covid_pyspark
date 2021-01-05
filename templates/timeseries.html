@@ -14,8 +14,10 @@
         <div class = "card-body">
             <center>
             <h2>{{ title }}</h2>
+            <h5><i>For prediction, click forecast button</i></h5>
             <button type="button" class="btn btn-primary mt-3" onclick="window.location = '/'">Cumulative stats</button>
             <button type="button" class="btn btn-warning mt-3" onclick = "window.location = '/forecast'">Predictive stats</button>
+            <!-- <button type="button" class="btn btn-warning mt-3" onclick = {some function}>Bootstrap prediction!</button> -->
 
             </center>
         </div>
@@ -59,7 +61,7 @@
   console.log(bar_data)
   var chart = new Chart(ctx, {
       // The type of chart we want to create
-      type: 'bar',
+      type: 'line',
   
       // Be careful of Javascript syntax
       data: {

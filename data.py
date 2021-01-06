@@ -3,7 +3,7 @@ import datetime
 import json
 import sys
 from pyspark.sql.types import StructField, StringType, DoubleType, StructType, DateType
-
+from pyspark.sql import SparkSession
 
 def clean_data(data):
 
@@ -22,7 +22,6 @@ def string_to_date(date):
     return date_time_obj.date()
 
 
-# request cumulative summary data
 def request_data(type = 'cumulative'):
 
     today = datetime.date.today()
@@ -41,8 +40,8 @@ def request_data(type = 'cumulative'):
         url_yesterday = f'https://api.opencovid.ca/summary?stat=cases&date={yesterday}&version="true"'
 
     elif type == 'time_series':
-        url_today = f'https://api.opencovid.ca/timeseries?stat=cases&loc=BC&after={year_before_today}&before={today}'
-        url_yesterday = f'https://api.opencovid.ca/timeseries?stat=cases&loc=BC&after={year_before_yesterday}&before={yesterday}' 
+        url_today = f'https://api.opencovid.ca/timeseries?stat=cases&loc=prov&after={year_before_today}&before={today}'
+        url_yesterday = f'https://api.opencovid.ca/timeseries?stat=cases&loc=prov&after={year_before_yesterday}&before={yesterday}' 
 
     response = requests.get(url_today)
 
@@ -62,39 +61,58 @@ def request_data(type = 'cumulative'):
         
     return response
 
-# Used for Cumulative data
-def data_to_df(type = 'cumulative', session=None):
 
-    response = request_data()
+def data_to_df(data_type = 'cumulative', session=None):
+
+    response = request_data(data_type)
     province_total = response.json()
 
     province_total_data = []
 
-    # select only the relevant information (TODO: Maybe add )
-    for record in province_total['summary']:
-        province_data = {}
-        province_data['province'] = record['province']
-        province_data['active_cases'] = clean_data(record['active_cases'])
-        province_data['cumulative_cases'] = clean_data(record['cumulative_cases'])
-        province_data['cumulative_tested'] = clean_data(record['cumulative_testing'])
-        province_data['cumulative_deaths'] = clean_data(record['cumulative_deaths'])
-        province_data['vaccine_administration'] = clean_data(record['cumulative_avaccine'])
-        province_data['cumulative_recovered'] = clean_data(record['cumulative_recovered'])
-        province_data['date'] = string_to_date(record['date'])
+    if data_type == 'cumulative':
+
+        for record in province_total['summary']:
+            province_data = {}
+            province_data['province'] = record['province']
+            province_data['active_cases'] = clean_data(record['active_cases'])
+            province_data['cumulative_cases'] = clean_data(record['cumulative_cases'])
+            province_data['cumulative_tested'] = clean_data(record['cumulative_testing'])
+            province_data['cumulative_deaths'] = clean_data(record['cumulative_deaths'])
+            province_data['vaccine_administration'] = clean_data(record['cumulative_avaccine'])
+            province_data['cumulative_recovered'] = clean_data(record['cumulative_recovered'])
+            province_data['date'] = string_to_date(record['date'])
+
+            province_total_data.append(province_data)
+
+        data_schema = [
+            StructField("province", StringType(), True),
+            StructField("active_cases", DoubleType(), True),
+            StructField("cumulative_cases", DoubleType(), True),
+            StructField("cumulative_tested", DoubleType(), True),
+            StructField("cumulative_deaths", DoubleType(), True),
+            StructField("vaccine_administration", DoubleType(), True),
+            StructField("cumulative_recovered", DoubleType(), True),
+            StructField('date', DateType(), True)
+        ]
+
+    elif data_type == 'time_series':
+
+        for record in province_total['cases']:
+            province_data = {}
+            province_data['province'] = record['province']
+            province_data['cases'] = clean_data(record['cases'])
+            province_data['cumulative_cases'] = clean_data(record['cumulative_cases'])
+            province_data['date_report'] = string_to_date(record['date_report'])
 
         province_total_data.append(province_data)
 
-    data_schema = [
-        StructField("province", StringType(), True),
-        StructField("active_cases", DoubleType(), True),
-        StructField("cumulative_cases", DoubleType(), True),
-        StructField("cumulative_tested", DoubleType(), True),
-        StructField("cumulative_deaths", DoubleType(), True),
-        StructField("vaccine_administration", DoubleType(), True),
-        StructField("cumulative_recovered", DoubleType(), True),
-        StructField('date', DateType(), True)
-    ]
-    
+        data_schema = [
+            StructField("province", StringType(), True),
+            StructField("cases", DoubleType(), True),
+            StructField("cumulative_cases", DoubleType(), True),
+            StructField('date_report', DateType(), True)
+        ]
+
     final_struct = StructType(fields=data_schema)
 
     df = session.createDataFrame(province_total_data,final_struct)
@@ -104,20 +122,12 @@ def data_to_df(type = 'cumulative', session=None):
     return final_df
 
 
-def time_series_to_df(data_type, session):
-    """
-    Current format. 
-    {'cases': [{'cases': 0, 'cumulative_cases': 0, 'date_report': '25-01-2020', 'province': 'BC'}, 
-    {'cases': 0, 'cumulative_cases': 0, 'date_report': '26-01-2020', 'province': 'BC'},
-    """
-
-
-
-
-    pass
-
-
-
 if __name__ == "__main__":
 
-    request_time_series()
+    spark = SparkSession.builder.appName('test_session').getOrCreate()
+    spark.sparkContext.setLogLevel("ERROR")
+
+    static_data = data_to_df('time_series', spark)
+
+    df = static_data.toPandas()
+    print(df.head(15))

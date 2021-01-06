@@ -1,33 +1,31 @@
-import socket
-import requests_oauthlib
 import numpy as np
 import pandas as pd
-import plotly.express as px
 from pyspark.sql.types import *
 from pyspark.sql import functions as F
 from pyspark.sql import SparkSession
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 from fbprophet import Prophet
 from data import *
 import findspark
 import os
 from flask import Flask, jsonify, request
 from flask import render_template
+from flask_caching import Cache
 # from pyspark import SparkConf, SparkContext # these are for older Sparks.
 # from pyspark.streaming import StreamingContext
 
-
+cache = Cache(config={'CACHE_TYPE': 'simple'})
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 findspark.init()
 findspark.find()
+cache.init_app(app)
 # os.environ['JAVA_HOME'] = '/Library/Java/JavaVirtualMachines/jdk1.8.0_271.jdk/Contents/Home'
 
 @app.route('/', methods=['POST', 'GET'])
+@cache.cached(timeout=300)
 def cumulative():
 
-    spark = SparkSession.builder.appName('covid_19_analysis').getOrCreate()
+    spark = SparkSession.builder.appName('covid_19_cumulative').getOrCreate()
     spark.sparkContext.setLogLevel("ERROR")
 
     static_data = data_to_df('cumulative', spark)
@@ -56,18 +54,19 @@ def cumulative():
                            )
 
 @app.route('/forecast', methods=['POST', 'GET'])
+@cache.cached(timeout=300)
 def timeseries():
 
-    spark = SparkSession.builder.appName('covid_19_analysis').getOrCreate()
+    spark = SparkSession.builder.appName('covid_19_time_series').getOrCreate()
     spark.sparkContext.setLogLevel("ERROR")
 
-    static_data = data_to_df('cumulative', spark)
+    static_data = data_to_df('time_series', spark)
 
     df = static_data.toPandas()
     print(df.head(15))
 
-    # label
-    bar_labels = df.province 
+    # label are the dates here 
+    bar_labels = df.date_report 
 
     # values
     active_cases = df.active_cases

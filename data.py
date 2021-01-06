@@ -4,41 +4,6 @@ import json
 import sys
 from pyspark.sql.types import StructField, StringType, DoubleType, StructType, DateType
 
-def request_data(type='cumulative'):
-
-    """
-    Specify the type of API calls to make
-    TODO: provide sophisticated control for the type of API calls one can make
-    """
-
-    today = datetime.date.today()
-    yesterday = today - datetime.timedelta(days=1)
-    yesterday = yesterday.strftime("%d-%m-%Y")
-    today = today.strftime("%d-%m-%Y")
-
-    if type == 'time_series':
-        pass
-
-    elif type == 'cumulative':
-        url_today = f'https://api.opencovid.ca/summary?stat=cases&date={today}&version="true"'
-        url_yesterday = f'https://api.opencovid.ca/summary?stat=cases&date={yesterday}&version="true"'
-
-    response = requests.get(url_today)
-
-    # Just making sure nothing is crashing
-    if response.status_code != 200:
-
-        if response.status_code == 404:
-            print('Data not found')
-            return None
-        else:
-            raise Exception("API failed - {}".format(response.text))
-    
-    if len(response.json()) <= 1:
-        print(f"Picking up results from {yesterday} as results of {today} are not updated yet.")
-        response = requests.get(url_yesterday)  
-
-    return response
 
 def clean_data(data):
 
@@ -56,10 +21,51 @@ def string_to_date(date):
 
     return date_time_obj.date()
 
-    
-def data_to_df(data_type, session):
 
-    response = request_data(data_type)
+# request cumulative summary data
+def request_data(type = 'cumulative'):
+
+    today = datetime.date.today()
+    year_before_today = today - datetime.timedelta(days=365)
+    year_before_today = year_before_today.strftime("%d-%m-%Y")
+
+    yesterday = today - datetime.timedelta(days=1)
+    year_before_yesterday = yesterday - datetime.timedelta(days=365)
+    year_before_yesterday = year_before_yesterday.strftime(("%d-%m-%Y"))
+
+    yesterday = yesterday.strftime("%d-%m-%Y")
+    today = today.strftime("%d-%m-%Y")
+
+    if type == 'cumulative':
+        url_today = f'https://api.opencovid.ca/summary?stat=cases&date={today}&version="true"'
+        url_yesterday = f'https://api.opencovid.ca/summary?stat=cases&date={yesterday}&version="true"'
+
+    elif type == 'time_series':
+        url_today = f'https://api.opencovid.ca/timeseries?stat=cases&loc=BC&after={year_before_today}&before={today}'
+        url_yesterday = f'https://api.opencovid.ca/timeseries?stat=cases&loc=BC&after={year_before_yesterday}&before={yesterday}' 
+
+    response = requests.get(url_today)
+
+    # Make sure nothing is crashing
+    if response.status_code != 200:
+
+        if response.status_code == 404:
+            print('Data not found')
+            return None
+        else:
+            raise Exception("API failed - {}".format(response.text))
+    
+    # Check if today's record has already been updated
+    if len(response.json()) <= 1:
+        print(f"Picking up results from {yesterday} as results of {today} are not updated yet.")
+        response = requests.get(url_yesterday)
+        
+    return response
+
+# Used for Cumulative data
+def data_to_df(type = 'cumulative', session=None):
+
+    response = request_data()
     province_total = response.json()
 
     province_total_data = []
@@ -98,10 +104,20 @@ def data_to_df(data_type, session):
     return final_df
 
 
+def time_series_to_df(data_type, session):
+    """
+    Current format. 
+    {'cases': [{'cases': 0, 'cumulative_cases': 0, 'date_report': '25-01-2020', 'province': 'BC'}, 
+    {'cases': 0, 'cumulative_cases': 0, 'date_report': '26-01-2020', 'province': 'BC'},
+    """
+
+
+
+
+    pass
+
+
 
 if __name__ == "__main__":
 
-    test = ['test', 'your', 'code']
-    code = ','.join(test)
-    print(code)
-
+    request_time_series()

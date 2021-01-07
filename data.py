@@ -4,6 +4,7 @@ import json
 import sys
 from pyspark.sql.types import StructField, StringType, DoubleType, StructType, DateType
 from pyspark.sql import SparkSession
+import time
 
 def clean_data(data):
 
@@ -33,6 +34,7 @@ def request_data(type = 'cumulative'):
     year_before_yesterday = year_before_yesterday.strftime(("%d-%m-%Y"))
 
     yesterday = yesterday.strftime("%d-%m-%Y")
+
     today = today.strftime("%d-%m-%Y")
 
     if type == 'cumulative':
@@ -41,7 +43,7 @@ def request_data(type = 'cumulative'):
 
     elif type == 'time_series':
         url_today = f'https://api.opencovid.ca/timeseries?stat=cases&loc=prov&after={year_before_today}&before={today}'
-        url_yesterday = f'https://api.opencovid.ca/timeseries?stat=cases&loc=prov&after={year_before_yesterday}&before={yesterday}' 
+        url_yesterday = f'https://api.opencovid.ca/timeseries?stat=cases&loc=prov&after={year_before_yesterday}&before={yesterday}'
 
     response = requests.get(url_today)
 
@@ -94,17 +96,26 @@ def data_to_df(data_type = 'cumulative', session=None):
             StructField("cumulative_recovered", DoubleType(), True),
             StructField('date', DateType(), True)
         ]
+        
+        final_struct = StructType(fields=data_schema)
+
+        df = session.createDataFrame(province_total_data,final_struct)
+
+        final_df = df.where((df.province != "Repatriated"))
+
+        return final_df
 
     elif data_type == 'time_series':
-
+                
         for record in province_total['cases']:
+        
             province_data = {}
             province_data['province'] = record['province']
             province_data['cases'] = clean_data(record['cases'])
             province_data['cumulative_cases'] = clean_data(record['cumulative_cases'])
             province_data['date_report'] = string_to_date(record['date_report'])
 
-        province_total_data.append(province_data)
+            province_total_data.append(province_data)
 
         data_schema = [
             StructField("province", StringType(), True),
@@ -113,13 +124,17 @@ def data_to_df(data_type = 'cumulative', session=None):
             StructField('date_report', DateType(), True)
         ]
 
-    final_struct = StructType(fields=data_schema)
+        final_struct = StructType(fields=data_schema)
 
-    df = session.createDataFrame(province_total_data,final_struct)
+        df = session.createDataFrame(province_total_data,final_struct)
 
-    final_df = df.where((df.province != "Repatriated"))
-    
-    return final_df
+        ## Lets only consider Alberta, BC, Quebec, Ontario
+        alberta_df = df.where((df.province == "Alberta"))
+        bc_df = df.where((df.province == 'BC'))
+        quebec_df = df.where((df.province == 'Quebec'))
+        ontario_df = df.where((df.province == 'Ontario'))
+
+        return alberta_df, bc_df, quebec_df, ontario_df
 
 
 if __name__ == "__main__":
@@ -127,7 +142,13 @@ if __name__ == "__main__":
     spark = SparkSession.builder.appName('test_session').getOrCreate()
     spark.sparkContext.setLogLevel("ERROR")
 
-    static_data = data_to_df('time_series', spark)
+    alberta_df, bc_df, quebec_df, ontario_df  = data_to_df('time_series', spark)
 
-    df = static_data.toPandas()
-    print(df.head(15))
+    print('The length of Alberta df is : {}'.format(len(alberta_df.toPandas())))
+    print('The length of BC df is : {}'.format(len(bc_df.toPandas())))
+    print('The length of Quebec df is : {}'.format(len(quebec_df.toPandas())))
+    print('The length of Ontario df is : {}'.format(len(ontario_df.toPandas())))
+
+    alberta_df = alberta_df.toPandas()
+
+    print('The date: ', alberta_df.date_report.iloc[-1])

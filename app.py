@@ -60,31 +60,28 @@ def timeseries():
     spark = SparkSession.builder.appName('covid_19_time_series').getOrCreate()
     spark.sparkContext.setLogLevel("ERROR")
 
-    static_data = data_to_df('time_series', spark)
+    alberta_df, bc_df, quebec_df, ontario_df  = data_to_df('time_series', spark)
 
-    df = static_data.toPandas()
-    print(df.head(15))
+    alberta_df = alberta_df.toPandas()
+    bc_df =  bc_df.toPandas()
+    quebec_df = quebec_df.toPandas()
+    ontario_df = ontario_df.toPandas()
 
     # label are the dates here 
-    bar_labels = df.date_report 
+    bar_labels = alberta_df.date_report 
 
     # values
-    active_cases = df.active_cases
-    cumulative_cases = df.cumulative_cases # default
-    cumulative_tested = df.cumulative_tested
-    cumulative_deaths = df.cumulative_deaths
-    vaccine_administration = df.vaccine_administration
-    cumulative_recovered = df.cumulative_recovered
-
+    alberta_cases = alberta_df.cases
+    bc_cases = bc_df.cases
+    quebec_cases = quebec_df.cases
+    ontario_cases = ontario_df.cases
 
     return render_template('timeseries.html',
-                           title=f'Time series stats up to {df.date[1]}', 
-                           labels=bar_labels, values_default=cumulative_cases,
-                           values_active_cases = active_cases, values_cumulative_cases = cumulative_cases,
-                           values_cumulative_tested = cumulative_tested, values_cumulative_deaths= cumulative_deaths,
-                           values_vaccine = vaccine_administration, values_cumulative_recovered = cumulative_recovered 
+                           title=f'Time series stats from {bar_labels.iloc[1]} up to {bar_labels.iloc[-1]}', 
+                           labels=bar_labels, values_alberta=alberta_cases,
+                           values_bc = bc_cases, values_quebec = quebec_cases,
+                           values_ontario = ontario_cases
                            )
-
 
 if __name__ == "__main__":
 

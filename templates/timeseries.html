@@ -6,14 +6,14 @@
 
 </head>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.js" integrity="sha512-zO8oeHCxetPn1Hd9PdDleg5Tw1bAaP0YmNvPY8CwcRyUk7d7/+nyElmFrB6f7vg4f7Fv4sui1mcep8RIEShczg==" crossorigin="anonymous"></script>
 
 <body class="bg-info py-5">
     <div class = "col-md-8 offset-md-2">
     <div class = "card">
         <div class = "card-body">
             <center>
-            <h2>{{ title }}</h2>
+            <h3>{{ title }}</h3>
             <h5><i>For prediction, click forecast button</i></h5>
             <button type="button" class="btn btn-primary mt-3" onclick="window.location = '/'">Cumulative stats</button>
             <button type="button" class="btn btn-warning mt-3" onclick = "window.location = '/forecast'">Predictive stats</button>
@@ -25,7 +25,10 @@
         </div>
         <center>
         <div id="btn-group">
-            <button id="active_cases" class="button button2" onclick="updateChart('Forecast')">Make forecast</button>
+            <button class="button button2" onclick="updateChart('Alberta')">Alberta</button>
+            <button class="button button2" onclick="updateChart('BC')">BC</button>
+            <button class="button button2" onclick="updateChart('Ontario')">Ontario</button>
+            <button class="button button2" onclick="updateChart('Quebec')">Quebec</button>
         </div>
         </center>
 </div>
@@ -36,105 +39,113 @@
 
 <script>
   var ctx = document.getElementById('myChart').getContext('2d');
-  var bar_data;
-  var title = 'Cumulative Cases'
-//   var max = {{ max }};
+  var alberta_data;
   var bar_labels = {labels: [
           {% for item in labels %}
            "{{ item }}",
           {% endfor %}
         ]};
   
-  bar_data = {values: [
-        {% for item in values_default %}
+  alberta_data = {values: [
+        {% for item in values_alberta %}
             {{ item }},
         {% endfor %}
   ]};
 
-  console.log(bar_labels)
-  console.log(bar_data)
+
   var chart = new Chart(ctx, {
       // The type of chart we want to create
       type: 'line',
   
-      // Be careful of Javascript syntax
       data: {
           labels: bar_labels.labels,
           datasets: [{
-              label: title,
-              borderColor: 'rgb(0, 99, 132)',
-              data: bar_data.values,
-          }]
-      },  
-      
-      options: {
-        scales: {
-            yAxes: [{
-                ticks: {
-                    suggestedMin: 0,
-                    suggestedMax: 300, 
-                }
-            }]
-        }
-    }
-  });
+              label: 'Alberta',
+              borderColor: 'rgb(6, 22, 255)',
+              backgroundColor: 'rgb(6, 22, 255)',
+              data: alberta_data.values,
+          }],
+        },
 
+        options: {
+            elements: {
+                line: {
+                    tension: 0 // disables bezier curves
+                },
+                point: {
+                    radius: 0
+                }
+            },
+            scales: {
+                xAxes: [{
+                    type: 'time',
+                    time: {
+                        unit: 'month'
+                    }
+                }]
+            }
+        }
+    });
+
+    
   // Should be able to throw ('death') for button click. 
   // Try chart.chart.data.label = 'new title', or at least console log this first. 
-  function updateChart(new_title){
+  function updateChart(province){
     
+    if (province == "Alberta"){
+        data = {values: [
+            {% for item in values_alberta %}
+                {{ item }},
+            {% endfor %}
+        ]};
+        
+        new_border_color = 'rgb(6, 22, 255)',
+        new_backgroundColor =  'rgb(6, 22, 255)'
 
-    if (new_title == "Active cases"){
+    } else if (province == "BC"){
         data = {values: [
-            {% for item in values_active_cases %}
+            {% for item in values_bc %}
                 {{ item }},
             {% endfor %}
         ]};
-    } else if (new_title == "Cumulative cases"){
+        
+        new_border_color = 'rgb(235, 56, 56)',
+        new_backgroundColor = 'rgb(235, 56, 56)'
+
+    } else if (province == "Ontario"){
         data = {values: [
-            {% for item in values_cumulative_cases %}
+            {% for item in values_ontario %}
                 {{ item }},
             {% endfor %}
         ]};
-    } else if (new_title == "Cumulative tested"){
+        
+        new_border_color = 'rgb(67, 236, 146)',
+        new_backgroundColor = 'rgb(67, 236, 146)'
+
+    } else if (province == "Quebec"){
         data = {values: [
-            {% for item in values_cumulative_tested %}
-                {{ item }},
-            {% endfor %}
-        ]};
-    } else if (new_title == "Cumulative deaths"){
-        data = {values: [
-            {% for item in values_cumulative_deaths %}
-                {{ item }},
-            {% endfor %}
-        ]};
-    } else if (new_title == "Vaccine administration"){
-        data = {values: [
-            {% for item in values_vaccine %}
+            {% for item in values_quebec %}
                 {{ item }},
             {% endfor %}
         ]};
 
-    } else if (new_title == "Cumulative recovered"){
-        data = {values: [
-            {% for item in values_cumulative_recovered %}
-                {{ item }},
-            {% endfor %}
-        ]};
+        new_border_color = 'rgb(243, 227, 82)',
+        new_backgroundColor = 'rgb(243, 227, 82)'
     }
     
 
     chart.data.datasets[0].data = data.values;
-    chart.data.datasets[0].label = new_title;
+    chart.data.datasets[0].label = province;
+    chart.data.datasets[0].borderColor = new_border_color
+    chart.data.datasets[0].backgroundColor = new_backgroundColor
 
-    // should be able to update the title here too. 
     chart.update();
-    console.log('Updated data:', new_title, data);
+    console.log('Updated data:', province, data);
   };
 
 </script>
 <style>
-h2 {
+h3 {
     color: #000000; 
     transition: .5s; 
     -moz-transition: .5s; 

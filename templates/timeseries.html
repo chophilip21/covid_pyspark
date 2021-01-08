@@ -16,7 +16,7 @@
             <h3>{{ title }}</h3>
             <h5><i>For prediction, click forecast button</i></h5>
             <button type="button" class="btn btn-primary mt-3" onclick="window.location = '/'">Cumulative stats</button>
-            <button type="button" class="btn btn-warning mt-3" onclick = "window.location = '/forecast'">Predictive stats</button>
+            <button type="button" class="btn btn-warning mt-3" onclick = "window.location = '/forecast'">Case Prediction</button>
 
             </center>
         </div>
@@ -29,6 +29,8 @@
             <button class="button button2" onclick="updateChart('BC')">BC</button>
             <button class="button button2" onclick="updateChart('Ontario')">Ontario</button>
             <button class="button button2" onclick="updateChart('Quebec')">Quebec</button>
+            <button type="button" class="btn btn-outline-success ml-5">Add forecast</button>
+            <button type="button" class="btn btn-outline-danger">Remove forecast</button>
         </div>
         </center>
 </div>
@@ -39,19 +41,26 @@
 
 <script>
   var ctx = document.getElementById('myChart').getContext('2d');
-  var alberta_data;
+  var current_state = 'Alberta' // use this as GLOBAL VARIABLE
+  var alberta_daily;
+  var alberta_cumulative;
   var bar_labels = {labels: [
           {% for item in labels %}
            "{{ item }}",
           {% endfor %}
         ]};
   
-  alberta_data = {values: [
+  alberta_daily = {values: [
         {% for item in values_alberta %}
             {{ item }},
         {% endfor %}
   ]};
 
+//   alberta_mortality = {values: [
+//         {% for item in cumulative_alberta %}
+//             {{ item }} / 1,
+//         {% endfor %}
+//   ]};
 
   var chart = new Chart(ctx, {
       // The type of chart we want to create
@@ -63,8 +72,14 @@
               label: 'Alberta',
               borderColor: 'rgb(6, 22, 255)',
               backgroundColor: 'rgb(6, 22, 255)',
-              data: alberta_data.values,
-          }],
+              data: alberta_daily.values,
+          },
+        //   {
+        //       label: 'Alberta (Cumulative)',
+        //       data: alberta_mortality.values,
+        //       borderColor: 'rgb(255,0,0)',
+        //   }
+        ],
         },
 
         options: {
@@ -73,7 +88,7 @@
                     tension: 0 // disables bezier curves
                 },
                 point: {
-                    radius: 0
+                    radius: 1
                 }
             },
             scales: {
@@ -89,7 +104,7 @@
 
     
   // Should be able to throw ('death') for button click. 
-  // Try chart.chart.data.label = 'new title', or at least console log this first. 
+  // TODO: Definte global varaible 
   function updateChart(province){
     
     if (province == "Alberta"){
@@ -109,8 +124,8 @@
             {% endfor %}
         ]};
         
-        new_border_color = 'rgb(235, 56, 56)',
-        new_backgroundColor = 'rgb(235, 56, 56)'
+        new_border_color = 'rgb(223, 127, 256)',
+        new_backgroundColor = 'rgb(223, 127, 256)'
 
     } else if (province == "Ontario"){
         data = {values: [

@@ -6,6 +6,7 @@ from pyspark.sql.types import StructField, StringType, DoubleType, StructType, D
 from pyspark.sql import SparkSession
 import time
 
+
 def clean_data(data):
 
     if data == "NULL":
@@ -21,7 +22,6 @@ def string_to_date(date):
     date_time_obj = datetime.datetime.strptime(date, '%d-%m-%Y')
 
     return date_time_obj.date()
-
 
 def request_data(type = 'cumulative'):
 
@@ -148,7 +148,8 @@ if __name__ == "__main__":
     print('The length of BC df is : {}'.format(len(bc_df.toPandas())))
     print('The length of Quebec df is : {}'.format(len(quebec_df.toPandas())))
     print('The length of Ontario df is : {}'.format(len(ontario_df.toPandas())))
-
-    alberta_df = alberta_df.toPandas()
-
-    print('The date: ', alberta_df.date_report.iloc[-1])
+    
+    # alberta_cumulatve = alberta_df.cumulative_cases
+    # alberta_population = 4371000
+    # for i, v in alberta_cumulatve.iteritems():
+    #     print((v/alberta_population) * 100000)

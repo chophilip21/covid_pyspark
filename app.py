@@ -19,7 +19,7 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 findspark.init()
 findspark.find()
 cache.init_app(app)
-os.environ['JAVA_HOME'] = '/Library/Java/JavaVirtualMachines/jdk1.8.0_271.jdk/Contents/Home'
+# os.environ['JAVA_HOME'] = '/Library/Java/JavaVirtualMachines/jdk1.8.0_271.jdk/Contents/Home'
 
 @app.route('/', methods=['POST', 'GET'])
 @cache.cached(timeout=300)
@@ -70,17 +70,26 @@ def timeseries():
     # label are the dates here 
     bar_labels = alberta_df.date_report 
 
-    # values
+    # values (daily)
     alberta_cases = alberta_df.cases
     bc_cases = bc_df.cases
     quebec_cases = quebec_df.cases
     ontario_cases = ontario_df.cases
 
+    #! I may use these values in the future
+    #values (cumulative)
+    # alberta_cumulatve = alberta_df.cumulative_cases
+    # bc_cumulative = bc_df.cumulative_cases
+    # quebec_cumulative = quebec_df.cumulative_cases
+    # ontario_cumulative = ontario_df.cumulative_cases
+
+
     return render_template('timeseries.html',
-                           title=f'Time series stats from {bar_labels.iloc[1]} up to {bar_labels.iloc[-1]}', 
-                           labels=bar_labels, values_alberta=alberta_cases,
-                           values_bc = bc_cases, values_quebec = quebec_cases,
-                           values_ontario = ontario_cases
+                           title=f'Daily COVID-19 cases from {bar_labels.iloc[1]} up to {bar_labels.iloc[-1]}', 
+                           labels=bar_labels, values_alberta=alberta_cases, cumulative_alberta = alberta_cumulatve, 
+                           values_bc = bc_cases, cumulative_bc = bc_cumulative, values_quebec = quebec_cases,
+                           cumulative_quebec = quebec_cumulative, values_ontario = ontario_cases, 
+                           cumulative_ontario = ontario_cumulative,
                            )
 
 if __name__ == "__main__":

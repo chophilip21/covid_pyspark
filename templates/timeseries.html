@@ -14,7 +14,7 @@
         <div class = "card-body">
             <center>
             <h3>{{ title }}</h3>
-            <h5><i>For prediction, click forecast button</i></h5>
+            <h5><i>For 30 days forecast, click forecast buttons down below</i></h5>
             <button type="button" class="btn btn-primary mt-3" onclick="window.location = '/'">Cumulative stats</button>
             <button type="button" class="btn btn-warning mt-3" onclick = "window.location = '/forecast'">Case Prediction</button>
 
@@ -25,12 +25,15 @@
         </div>
         <center>
         <div id="btn-group">
-            <button class="button button2" onclick="updateChart('Alberta')">Alberta</button>
-            <button class="button button2" onclick="updateChart('BC')">BC</button>
-            <button class="button button2" onclick="updateChart('Ontario')">Ontario</button>
-            <button class="button button2" onclick="updateChart('Quebec')">Quebec</button>
-            <button type="button" class="btn btn-outline-success ml-5">Add forecast</button>
-            <button type="button" class="btn btn-outline-danger">Remove forecast</button>
+            <button class="button button2" onclick="updateChart('Alberta')">Alberta (current)</button>
+            <button class="button button2" onclick="updateChart('BC')">BC (current) </button>
+            <button class="button button2" onclick="updateChart('Ontario')">Ontario (current)</button>
+            <button class="button button2" onclick="updateChart('Quebec')">Quebec (current) </button>
+            <button type="button" class="btn btn-outline-success ml-5" onclick="add_forecast('Alberta')">Alberta (30 days)</button>
+            <button type="button" class="btn btn-outline-success" onclick="add_forecast('BC')">BC (30 days)</button>
+            <button type="button" class="btn btn-outline-success" onclick="add_forecast('Ontario')">Ontario (30 days)</button>
+            <button type="button" class="btn btn-outline-success" onclick="add_forecast('Quebec')">BC (30 days)</button>
+
         </div>
         </center>
 </div>
@@ -41,26 +44,19 @@
 
 <script>
   var ctx = document.getElementById('myChart').getContext('2d');
-  var current_state = 'Alberta' // use this as GLOBAL VARIABLE
   var alberta_daily;
-  var alberta_cumulative;
   var bar_labels = {labels: [
           {% for item in labels %}
            "{{ item }}",
           {% endfor %}
         ]};
+
   
   alberta_daily = {values: [
         {% for item in values_alberta %}
             {{ item }},
         {% endfor %}
   ]};
-
-//   alberta_mortality = {values: [
-//         {% for item in cumulative_alberta %}
-//             {{ item }} / 1,
-//         {% endfor %}
-//   ]};
 
   var chart = new Chart(ctx, {
       // The type of chart we want to create
@@ -102,9 +98,68 @@
         }
     });
 
-    
-  // Should be able to throw ('death') for button click. 
-  // TODO: Definte global varaible 
+  function add_forecast(province){
+
+    var new_labels = {labels: [
+        {% for item in forecast_labels %}
+        "{{ item }}",
+        {% endfor %}
+        ]};
+
+    if (province == "Alberta"){
+        data = {values: [
+            {% for item in forecast_alberta %}
+                {{ item }},
+            {% endfor %}
+        ]};
+        
+        new_border_color = 'rgb(6, 22, 255)',
+        new_backgroundColor =  'rgb(6, 22, 255)'
+
+    } else if (province == "BC"){
+        data = {values: [
+            {% for item in forecast_bc %}
+                {{ item }},
+            {% endfor %}
+        ]};
+        
+        new_border_color = 'rgb(223, 127, 256)',
+        new_backgroundColor = 'rgb(223, 127, 256)'
+
+    } else if (province == "Ontario"){
+        data = {values: [
+            {% for item in forecast_ontario %}
+                {{ item }},
+            {% endfor %}
+        ]};
+        
+        new_border_color = 'rgb(67, 236, 146)',
+        new_backgroundColor = 'rgb(67, 236, 146)'
+
+    } else if (province == "Quebec"){
+        data = {values: [
+            {% for item in forecast_quebec %}
+                {{ item }},
+            {% endfor %}
+        ]};
+        
+        new_border_color = 'rgb(243, 227, 82)',
+        new_backgroundColor = 'rgb(243, 227, 82)'
+    }
+
+    // console.log(new_labels.labels);
+    // console.log(data.values);
+
+    chart.data.datasets[0].data = data.values;
+    chart.data.labels = new_labels.labels;
+    chart.data.datasets[0].label = "30 days forecast: ".concat(province)
+    chart.data.datasets[0].borderColor = new_border_color
+    chart.data.datasets[0].backgroundColor = new_backgroundColor
+
+    chart.update();
+
+  }
+
   function updateChart(province){
     
     if (province == "Alberta"){
@@ -137,26 +192,31 @@
         new_border_color = 'rgb(67, 236, 146)',
         new_backgroundColor = 'rgb(67, 236, 146)'
 
+
     } else if (province == "Quebec"){
         data = {values: [
             {% for item in values_quebec %}
                 {{ item }},
             {% endfor %}
         ]};
-
+        
         new_border_color = 'rgb(243, 227, 82)',
         new_backgroundColor = 'rgb(243, 227, 82)'
+
     }
     
-
+    chart.data.labels = bar_labels.labels;
     chart.data.datasets[0].data = data.values;
     chart.data.datasets[0].label = province;
     chart.data.datasets[0].borderColor = new_border_color
     chart.data.datasets[0].backgroundColor = new_backgroundColor
 
+
+    console.log(bar_labels.labels);
+    console.log(data.values);  
     chart.update();
-    console.log('Updated data:', province, data);
-  };
+
+};
 
 </script>
 <style>

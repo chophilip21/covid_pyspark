@@ -139,16 +139,7 @@ def data_to_df(data_type = 'cumulative', session=None):
 
 if __name__ == "__main__":
 
-    spark = SparkSession.builder.appName('test_session').getOrCreate()
-    spark.sparkContext.setLogLevel("ERROR")
-
-    alberta_df, bc_df, quebec_df, ontario_df  = data_to_df('time_series', spark)
-
-    print('The length of Alberta df is : {}'.format(len(alberta_df.toPandas())))
-    print('The length of BC df is : {}'.format(len(bc_df.toPandas())))
-    print('The length of Quebec df is : {}'.format(len(quebec_df.toPandas())))
-    print('The length of Ontario df is : {}'.format(len(ontario_df.toPandas())))
-    
+    pass 
     # alberta_cumulatve = alberta_df.cumulative_cases
     # alberta_population = 4371000
     # for i, v in alberta_cumulatve.iteritems():

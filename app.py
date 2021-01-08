@@ -10,6 +10,7 @@ import os
 from flask import Flask, jsonify, request
 from flask import render_template
 from flask_caching import Cache
+from forecast import prophet_forecast
 # from pyspark import SparkConf, SparkContext # these are for older Sparks.
 # from pyspark.streaming import StreamingContext
 
@@ -77,19 +78,23 @@ def timeseries():
     ontario_cases = ontario_df.cases
 
     #! I may use these values in the future
-    #values (cumulative)
     # alberta_cumulatve = alberta_df.cumulative_cases
     # bc_cumulative = bc_df.cumulative_cases
     # quebec_cumulative = quebec_df.cumulative_cases
     # ontario_cumulative = ontario_df.cumulative_cases
 
+    #prediction value
+    alberta_prediction, new_dates = prophet_forecast(alberta_df)
+    bc_prediction, _ = prophet_forecast(bc_df)
+    ontario_prediction, _ = prophet_forecast(quebec_df)
+    quebec_prediction, _ = prophet_forecast(ontario_df)
 
     return render_template('timeseries.html',
                            title=f'Daily COVID-19 cases from {bar_labels.iloc[1]} up to {bar_labels.iloc[-1]}', 
-                           labels=bar_labels, values_alberta=alberta_cases, cumulative_alberta = alberta_cumulatve, 
-                           values_bc = bc_cases, cumulative_bc = bc_cumulative, values_quebec = quebec_cases,
-                           cumulative_quebec = quebec_cumulative, values_ontario = ontario_cases, 
-                           cumulative_ontario = ontario_cumulative,
+                           labels=bar_labels, forecast_labels= new_dates, values_alberta=alberta_cases, 
+                           forecast_alberta = alberta_prediction, values_bc = bc_cases, forecast_bc = bc_prediction, 
+                           values_quebec = quebec_cases, forecast_quebec = ontario_prediction, values_ontario = ontario_cases, 
+                           forecast_ontario = quebec_prediction,
                            )
 
 if __name__ == "__main__":

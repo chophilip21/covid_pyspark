@@ -1,10 +1,13 @@
 # covid_pyspark
 
-This repository uses Python API of Apache Spark for processing COVID-19 related data. It uses Python Flask for backend, and Javascript for the front. 
+This repository uses Python API of Apache Spark for processing real-time COVID-19 related data. It uses Python Flask for back-end, and Javascript (Chart.js) for the front-end visualization. This Flask App contains two pages, one for <b>cumulative real time stats</b> taken from following open source provider: https://opencovid.ca/api/, and another for <b>time-series forecasting</b> based on Facebook Prophet.  
 
-## Live Demo
+## Live Demo (A. Cumulative, B. Time series forecasting)
 
-Link for the live demo and screen shot will goo here. 
+![Cumulative](cumulative.gif)
+
+![Time_series](time_series.gif)
+
 
 ## How do run
 This repository assumes that you have already configured Apache Spark, JAVA, Scala environment properly. 
@@ -27,13 +30,8 @@ and then run:
 python app.py
 ```
 
-<!-- 
-## Data Streaming using Apache Spark
+## Future Improvements
 
-Traditionally, when people think about data streaming, terms such as “real-time,” “24/7,” or “always on” come to mind. But you may have cases where data only arrives at fixed intervals. That is, data appears every hour or once a day, and COVID-19 data is only updated once a day as well. Nevertheless, we cannot say that the nature of our data is static, and therefore it is still beneficial to perform incremental processing on this data. However, it would be wasteful to keep a cluster up and running 24/7 just to perform a short amount of processing once a day. We can minimze the waste using trigger feature in Pyspark structured streaming. 
+The original plan was to use Spark Structured Streaming for processing the data, supported with Apache Kafka. Nevertheless, unlike dynamic data like stock price that changes every minute, Covid-19 data is only updated once a day and I thought using structured streaming for local server project is a bit of overkill. Future plans include uploading the project on live server and use structured streaming.
 
-Structured streaming has benefit over traditional batch based streaming in that you do not have to deal with figuring out what data is new, what you should process, and what you should not.
-
-## Kafka 
-
-Kafka is an event streaming platform, which acts as a database in this case. Here, we pulish and subscribe to streams of events, similar to a message queue or enterprise messaging system. You can also store streams of events in a fault-tolerant storage as long as you want (hours, days, months, forever). -->
+Next, COVID-19 data is extremely volatile as forecasting this accurately will require immense amount of data, including information like population density, provincial government covid-19 related policy, and such. At the moment, the forecasting logic solely relies on 12 months data and this is not enough. When this project gets updated, forecasting logic will also be revised.  

@@ -1,4 +1,4 @@
-# covid_pyspark
+# Covid_pyspark
 
 This repository uses Python API of Apache Spark for processing real-time COVID-19 related data. It uses Python Flask for back-end, and Javascript (Chart.js) for the front-end visualization. This Flask App contains two pages, one for <b>cumulative real time stats</b> taken from following open source provider: https://opencovid.ca/api/, and another for <b>time-series forecasting</b> based on Facebook Prophet.  
 
@@ -9,7 +9,7 @@ This repository uses Python API of Apache Spark for processing real-time COVID-1
 ![Time_series](time_series.gif)
 
 
-## How do run
+## How to run the code
 This repository assumes that you have already configured Apache Spark, JAVA, Scala environment properly. 
 If not, you can refer to some of the guides available online like the following: https://phoenixnap.com/kb/install-spark-on-ubuntu
 

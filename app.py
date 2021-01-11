@@ -20,7 +20,7 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 findspark.init()
 findspark.find()
 cache.init_app(app)
-# os.environ['JAVA_HOME'] = '/Library/Java/JavaVirtualMachines/jdk1.8.0_271.jdk/Contents/Home'
+os.environ['JAVA_HOME'] = '/Library/Java/JavaVirtualMachines/jdk1.8.0_271.jdk/Contents/Home'
 
 @app.route('/', methods=['POST', 'GET'])
 @cache.cached(timeout=300)

@@ -4,9 +4,9 @@ This repository uses Python API of Apache Spark for processing real-time COVID-1
 
 ## Live Demo (A. Cumulative, B. Time series forecasting)
 
-![Cumulative](sample/cumulative.gif)
+![Cumulative](templates/cumulative.gif)
 
-![Time_series](sample/time_series.gif)
+![Time_series](templates/time_series.gif)
 
 
 ## How to run the code

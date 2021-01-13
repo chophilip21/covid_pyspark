@@ -11,8 +11,8 @@ from flask import Flask, jsonify, request
 from flask import render_template
 from flask_caching import Cache
 from forecast import prophet_forecast
-# from pyspark import SparkConf, SparkContext # these are for older Sparks.
-# from pyspark.streaming import StreamingContext
+from covid_map import *
+
 
 cache = Cache(config={'CACHE_TYPE': 'simple'})
 app = Flask(__name__)
@@ -20,7 +20,7 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 findspark.init()
 findspark.find()
 cache.init_app(app)
-os.environ['JAVA_HOME'] = '/Library/Java/JavaVirtualMachines/jdk1.8.0_271.jdk/Contents/Home'
+# os.environ['JAVA_HOME'] = '/Library/Java/JavaVirtualMachines/jdk1.8.0_271.jdk/Contents/Home'
 
 @app.route('/', methods=['POST', 'GET'])
 @cache.cached(timeout=300)
@@ -33,6 +33,9 @@ def cumulative():
 
     df = static_data.toPandas()
     print(df.head(15))
+
+    #initialize map from covid_map
+    # init_map(app, df)
 
     # label
     bar_labels = df.province 

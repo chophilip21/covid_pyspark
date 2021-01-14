@@ -12,6 +12,7 @@ from flask import render_template
 from flask_caching import Cache
 from forecast import prophet_forecast
 from covid_map import *
+from config import MAPBOX_ACCESSTOKEN
 
 
 cache = Cache(config={'CACHE_TYPE': 'simple'})
@@ -35,7 +36,7 @@ def cumulative():
     print(df.head(15))
 
     #initialize map from covid_map
-    # init_map(app, df)
+    z, locations = draw_fig(df)
 
     # label
     bar_labels = df.province 
@@ -54,7 +55,8 @@ def cumulative():
                            labels=bar_labels, values_default=cumulative_cases,
                            values_active_cases = active_cases, values_cumulative_cases = cumulative_cases,
                            values_cumulative_tested = cumulative_tested, values_cumulative_deaths= cumulative_deaths,
-                           values_vaccine = vaccine_administration, values_cumulative_recovered = cumulative_recovered 
+                           values_vaccine = vaccine_administration, values_cumulative_recovered = cumulative_recovered,
+                           map_z = z, map_locations = locations, api_key = MAPBOX_ACCESSTOKEN
                            )
 
 @app.route('/forecast', methods=['POST', 'GET'])

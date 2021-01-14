@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 </head>
-
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 
 <body class="bg-info py-5">
@@ -17,12 +17,11 @@
             <h5><i>Click buttons on the bottom to view different cumulative stats of all provinces </i></h5>
             <button type="button" class="btn btn-primary mt-3" onclick="window.location = '/'">Cumulative stats</button>
             <button type="button" class="btn btn-warning mt-3" onclick = "window.location = '/forecast'">Case Prediction</button>
-            <button type="button" class="btn btn-danger mt-3" data-toggle="modal" data-target="#exampleModal">Map(test) </button>
-
             </center>
         </div>
         <div class = "card-body">
             <canvas id="myChart"></canvas>
+            <div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
         </div>
         <center>
         <div id="btn-group">
@@ -32,6 +31,7 @@
             <button id= "cumulative_deaths" class="button button2" onclick="updateChart('Cumulative deaths')">Cumulative deaths</button>
             <button id="vaccine_administration" class="button button2" onclick="updateChart('Vaccine administration')">Vaccine administration</button>
             <button id="cumulative_recovered" class="button button2" onclick="updateChart('Cumulative recovered')">Cumulative recovered</button>
+            <!-- <button id="cases_map" class="button button3" onclick="showmap('Cumulative cases')">Cases Map</button> -->
         </div>
         </center>
 </div>
@@ -40,24 +40,6 @@
 </center> -->
 </div>
 
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        maybe we can have the figures here..?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
   var ctx = document.getElementById('myChart').getContext('2d');
@@ -76,8 +58,8 @@
         {% endfor %}
   ]};
 
-  console.log(bar_labels)
-  console.log(bar_data)
+//   console.log(bar_labels)
+//   console.log(bar_data)
   var chart = new Chart(ctx, {
       // The type of chart we want to create
       type: 'bar',
@@ -103,12 +85,46 @@
             }]
         }
     }
-  });
+  });   
 
-  // Should be able to throw ('death') for button click. 
-  // Try chart.chart.data.label = 'new title', or at least console log this first. 
-  function updateChart(new_title){
+  function showmap(title){
+    console.log('trying to hide using jquery');
+    $("#myChart").hide(); 
+
+
+    var locations = {values: [
+            {% for item in map_locations %}
+                {{ item }},
+            {% endfor %}
+    ]};
+
+    var z = {values: [
+            {% for item in map_z %}
+                {{ item }},
+            {% endfor %}
+    ]};
+
     
+    // var map_box_key = {{ api_key }}
+
+    var data = [{
+        type: "choroplethmapbox", name: title, geojson: "data/canada.json", 
+        locations: locations.values,
+        z: z.values, colorbar: {y: 0, yanchor: "bottom", title: {text: title, side: "right"}}}
+        ];
+
+    var layout = {mapbox: {style: "dark", center: {lat: 62.20, lon: -106.34}, zoom: 2}, width: 600, height: 400, margin: {t: 0, b: 0}};
+
+    var config = {mapboxAccessToken:"pk.eyJ1IjoiY2hvcGhpbGlwMjEiLCJhIjoiY2tqdWtwMHdyMW1uZzMwdGNkenF3YnFsdSJ9.6gmeotwTdUH8arCNCPIcaA"};
+
+    Plotly.newPlot('myDiv', data, layout, config);
+
+  }
+
+  // Call update for Chart.js module
+  function updateChart(new_title){
+    $("#myDiv").hide();
+    $("#myChart").show();
 
     if (new_title == "Active cases"){
         data = {values: [
@@ -194,6 +210,18 @@ h2 {
     background-color: #008CBA;
     color: white;
 }
+
+.button3 {
+    background-color: rgb(132, 248, 138); 
+    color: black; 
+    border: 2px solid #16663e;
+}
+
+.button3:hover {
+    background-color: #16633e;
+    color: white;
+}
+
 
 }
 

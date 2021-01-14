@@ -1,8 +1,3 @@
-# from dash import Dash
-import plotly.graph_objects as go
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
 import os
 import json
 import pandas as pd
@@ -16,6 +11,11 @@ from data import *
 import findspark
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from config import MAPBOX_ACCESSTOKEN
+
+from bokeh.io import output_file, show
+from bokeh.models import GeoJSONDataSource
+from bokeh.plotting import figure
+from bokeh.sampledata.sample_geojson import geojson
 
 findspark.init()
 findspark.find()
@@ -87,9 +87,26 @@ def draw_fig(df=None, field='cumulative_cases', file_location='data/gpr_000b11a_
 
 
 if __name__ == "__main__":
-    spark = SparkSession.builder.appName('covid_19_cumulative').getOrCreate()
-    spark.sparkContext.setLogLevel("ERROR")
-    static_data = data_to_df('cumulative', spark)
-    df = static_data.toPandas()
+    # spark = SparkSession.builder.appName('covid_19_cumulative').getOrCreate()
+    # spark.sparkContext.setLogLevel("ERROR")
+    # static_data = data_to_df('cumulative', spark)
+    # df = static_data.toPandas()
 
-    draw_fig(df=df, return_fig=True, create_json=True)
+    output_file("geojson.html")
+
+    data = json.loads(geojson)
+    for i in range(len(data['features'])):
+        data['features'][i]['properties']['Color'] = ['blue', 'red'][i%2]
+
+    geo_source = GeoJSONDataSource(geojson=json.dumps(data))
+
+    TOOLTIPS = [
+        ('Organisation', '@OrganisationName')
+    ]
+
+    p = figure(background_fill_color="lightgrey", tooltips=TOOLTIPS)
+    p.circle(x='x', y='y', size=15, color='Color', alpha=0.7, source=geo_source)
+
+    show(p)
+
+    print('testing bokeh')
